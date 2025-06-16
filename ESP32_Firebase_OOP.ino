@@ -41,7 +41,7 @@ void loop() {
   // Reset tip harian jika hari berubah
   if (lastTipDay != timeinfo.tm_mday) {
     lastTipDay = timeinfo.tm_mday;
-    sensorReader.resetTipCount();  // ✅ objek, bukan pointer
+    sensorReader.resetTipCount();  
     Serial.println("Tip count di-reset karena hari berganti.");
   }
   firebaseHandler.getOffsetFromFirestore();  // opsional: panggil hanya saat perlu
