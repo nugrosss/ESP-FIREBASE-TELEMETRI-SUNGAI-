@@ -18,13 +18,16 @@ public:
   float readAverageVoltage();
   float readAverageTip();
   float readWaterLevel();
-  void handleTip();  // untuk dipanggil dari ISR
+  void handleTip();
+  void resetTipCount();  
+  int getTipCount();
 
   static void IRAM_ATTR tipISR();  // static ISR
 
 private:
   static volatile int tipCount;
   static unsigned long lastInterruptTime;
+  
 };
 extern SensorReader sensorReader;
 

@@ -19,6 +19,11 @@ private:
   unsigned long lastOffsetTime = 0;
   unsigned long lastPatchTimeFull = 0;
   unsigned long lastPatchTimeTip = 0;
+  unsigned long lastTipDay = 0;
+
+  // // int lastTipDay = -1;
+  // SensorReader* sensorReader = nullptr;
+
 
 
 public:
@@ -74,9 +79,8 @@ public:
   }
 }
 
-void sendPatchToFirestore(float avgCurrent, int avgVoltage , int avgTip, int avgWtrLvl) {
+void sendPatchToFirestore(float avgCurrent, int avgVoltage , int avgTip, int avgWtrLvl,float totalRainfall ) {
   int adjustedWaterLevel = avgWtrLvl - offsetz;
-  Serial.print("cekoffset: "); Serial.println(adjustedWaterLevel);
 
   // PATCH lengkap setiap 1 detik
   if (Firebase.ready() && millis() - lastPatchTimeFull >= 1000) {
@@ -84,9 +88,10 @@ void sendPatchToFirestore(float avgCurrent, int avgVoltage , int avgTip, int avg
 
     FirebaseJson json;
     json.set("fields/arus/doubleValue", String(avgCurrent,2));
-    json.set("fields/tip/integerValue", avgWtrLvl);
+    // json.set("fields/tip/integerValue", avgTip);
     json.set("fields/water/integerValue", adjustedWaterLevel);
     json.set("fields/tegangan/integerValue", avgVoltage);
+    json.set("fields/tip/doubleValue", String(totalRainfall,2));
 
     if (Firebase.Firestore.patchDocument(&fbdo, "coba-login-30bec", "", "Cobaesp/data", json.raw(), "")) {
       Serial.println("PATCH (FULL) success");
@@ -94,27 +99,14 @@ void sendPatchToFirestore(float avgCurrent, int avgVoltage , int avgTip, int avg
       Serial.println(fbdo.errorReason());
     }
   }
-
-  // PATCH hanya tip setiap 5 detik
-  if (Firebase.ready() && millis() - lastPatchTimeTip >= 10000) {
-    lastPatchTimeTip = millis();
-
-    FirebaseJson json;
-    json.set("fields/tip/integerValue", avgWtrLvl);
-
-    if (Firebase.Firestore.patchDocument(&fbdo, "coba-login-30bec", "", "Cobaesp/data", json.raw(), "")) {
-      Serial.println("########################");
-      Serial.println("PATCH (TIP) success");
-      Serial.println("########################");
-    } else {
-      Serial.println(fbdo.errorReason());
-    }
-  }
 }
 
 
-  void sendCreateToFirestore(int avgCurrent, int avgVolatge , int avgTip, int avgWtrLvl) {
-    if (Firebase.ready() && millis() - lastCreateTime >= 60000) {
+
+
+
+void sendCreateToFirestore(int avgCurrent, int avgVolatge , int avgTip, int avgWtrLvl,float totalRainfall) {
+    if (Firebase.ready() && millis() - lastCreateTime >= 3600000) {
       lastCreateTime = millis();
       int adjustedWaterLevel = offsetz -avgWtrLvl ;
       time_t now;
@@ -130,7 +122,7 @@ void sendPatchToFirestore(float avgCurrent, int avgVoltage , int avgTip, int avg
 
       FirebaseJson json;
       json.set("fields/arus/doubleValue", avgCurrent);
-      json.set("fields/tip/integerValue", avgTip);
+      json.set("fields/tip/integerValue", totalRainfall);
       json.set("fields/water/integerValue", adjustedWaterLevel);
       json.set("fields/tegangan/doubleValue",avgVolatge);
       json.set("fields/day/stringValue", day);

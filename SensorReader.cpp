@@ -38,7 +38,7 @@ float SensorReader::readAverageVoltage() {
 float SensorReader::readAverageTip() {
   noInterrupts();
   int tips = tipCount;
-  tipCount = 0;
+  // tipCount = 0;
   interrupts();
 
   const float mmPerTip = 0.70;
@@ -51,6 +51,17 @@ void SensorReader::handleTip() {
     tipCount++;
     lastInterruptTime = currentTime;
   }
+}
+void SensorReader::resetTipCount() {
+  noInterrupts();
+  tipCount = 0;
+  interrupts();
+}
+int SensorReader::getTipCount() {
+  noInterrupts();
+  int tips = tipCount;
+  interrupts();
+  return tips;
 }
 float SensorReader::readWaterLevel() {
   digitalWrite(TRIG_PIN, LOW);
